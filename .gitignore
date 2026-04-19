@@ -1,0 +1,28 @@
+# Raw data — reproducible from external sources, should not be committed
+data/raw/
+data/interim/
+data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Outputs (keep structure via .gitkeep, exclude artifacts)
+outputs/figures/*
+outputs/tables/*
+outputs/logs/*
+!outputs/figures/.gitkeep
+!outputs/tables/.gitkeep
+!outputs/logs/.gitkeep
+
+# Env / IDE
+.env
+.venv/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

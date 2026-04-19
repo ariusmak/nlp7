@@ -1,0 +1,20 @@
+data:
+  raw_reddit: data/raw/reddit
+  raw_wrds: data/raw/wrds
+  raw_market: data/raw/market
+  interim: data/interim
+  processed: data/processed
+
+outputs:
+  figures: outputs/figures
+  tables: outputs/tables
+  logs: outputs/logs
+
+configs: configs
+
+files:
+  reddit_posts_csv: data/raw/reddit/r_wallstreetbets_posts.csv
+  reddit_posts_parquet: data/raw/reddit/p4p_reddit_posts.parquet
+  earnings_dates_csv: data/raw/wrds/earnings_dates.csv
+  earnings_dates_parquet: data/raw/wrds/earnings_dates.parquet
+  crsp_daily_parquet: data/raw/market/crsp_daily.parquet

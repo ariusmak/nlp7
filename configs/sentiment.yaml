@@ -1,0 +1,13 @@
+use_custom_lexicon: true
+use_phrase_map: true
+use_emoji_map: true
+
+compound_thresholds:
+  positive: 0.05
+  negative: -0.05
+
+emit_audit_table: true
+
+event_window_days: 10
+
+pre_sentiment_preprocessing_only: true
