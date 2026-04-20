@@ -3,18 +3,17 @@ data/raw/
 data/interim/
 data/processed/
 
+# Handoff dataset IS committed (minimum inputs for groupmates)
+!data/handoff/
+
 # Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 .ipynb_checkpoints/
 
-# Outputs (keep structure via .gitkeep, exclude artifacts)
-outputs/figures/*
-outputs/tables/*
+# Outputs: figures and tables are committed; logs are not
 outputs/logs/*
-!outputs/figures/.gitkeep
-!outputs/tables/.gitkeep
 !outputs/logs/.gitkeep
 
 # Env / IDE
