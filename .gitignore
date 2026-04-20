@@ -25,3 +25,6 @@ outputs/logs/*
 # OS
 .DS_Store
 Thumbs.db
+
+# Local-only agent / project docs (kept on disk, not tracked)
+CLAUDE.md
