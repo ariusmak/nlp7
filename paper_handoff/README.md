@@ -11,6 +11,27 @@ sentiment features (`post_count`, `mean_sentiment`, `median_sentiment`,
 and calendar-year fixed effects. Train = 2016-2021 (n=360), test =
 2022 through 2023-03-28 (n=75).
 
+## Fastest path for teammates
+
+If time is tight, prioritize these artifacts in the main paper:
+
+1. `event_sentiment_per_ticker_vader.csv` in Section 5.1 for coverage.
+2. `eda_feature_target_correlations.csv` and
+   `robustness_cross_scorer_event_corr.csv` in Section 5.4 for weak
+   feature/target and scorer-agreement evidence.
+3. `final_comparison_coefficients_wide.csv`,
+   `final_comparison_summary.csv`, `model_metrics_vader.csv`, and
+   `model_metrics_finbert.csv` in Section 5.5 for the main result.
+4. `robustness_joint_ftest.csv` and `robustness_bootstrap_test_rmse.csv`
+   in Section 5.5 for the formal "no reliable improvement" claim.
+5. `robustness_geq10_posts.csv` and
+   `sentiment_label_confusion_finbert.csv` in Section 6 / 7.1 for
+   limitations and interpretation.
+
+Use the FinBERT artifacts as a robustness/scorer-comparison check, not as
+the primary sentiment method. The locked primary method remains adapted
+VADER.
+
 ---
 
 ## Section 5.1 (Dataset Coverage) — additions
@@ -62,10 +83,11 @@ features.
 small inline table of the top 5 correlations or as an appendix table.
 
 **Why it matters / what to write.** Section 5.4 currently says correlation
-is "weak" without numbers. The largest |r| is roughly 0.05 - 0.06, so even
-the *best* feature explains under 0.4% of variance in the target. Provides
-the quantitative backing for the "fitting curve is almost flat" sentence
-already in the paper.
+is "weak" without numbers. The largest |r| is `frac_negative` at about
+0.103, so even the *best* feature explains only about 1.1% of variance in
+the target. The next-largest correlations are about 0.06. This provides
+quantitative backing for the "fitting curve is almost flat" sentence
+already in the paper, but avoid saying the top correlation is only 0.05.
 
 ### `robustness_cross_scorer_event_corr.csv`
 
@@ -88,14 +110,15 @@ orthogonal constructs at the event level.
 
 ## Section 5.5 (Model Performance) — core regression evidence
 
-### `final_comparison_coefficients_wide.csv` (and `_long.csv`)
+### `final_comparison_coefficients_wide.csv` (and `final_comparison_coefficients_long.csv`)
 
 **What it contains.** OLS coefficients with p-values for the three OLS
 variants — baseline, VADER+sentiment, FinBERT+sentiment — pivoted into
 parallel `coef_*` and `pvalue_*` columns. Includes `const`, the four
 market features, the six sentiment features, all 14 ticker fixed effects,
-and all 7 year fixed effects. The `_long.csv` is the same data unpivoted
-with a `sig` column (`*** p<0.01`, `** p<0.05`, `* p<0.10`).
+and all 7 year fixed effects. `final_comparison_coefficients_long.csv` is
+the same data unpivoted with a `sig` column (`*** p<0.01`, `** p<0.05`,
+`* p<0.10`).
 
 **Where it goes.** New regression table in Section 5.5, replacing or
 supplementing Table 2. The main body should show only the core rows
@@ -123,11 +146,12 @@ RMSE/MAE, directional accuracy for the three OLS variants.
 **Where it goes.** Section 5.5, as a small fit-statistic block above
 Table 2 or merged into Table 2's bottom rows.
 
-**Why it matters / what to write.** All three models have **negative
-adj R^2** (-0.024 to -0.042 depending on variant). The full-model F-test
-is non-significant for both sentiment variants. This is a much sharper
-finding than "RMSE is similar": adjusted for parameter count, the
-sentiment-augmented models *fit worse* than the baseline.
+**Why it matters / what to write.** All three OLS variants have **negative
+adjusted R^2** (about -0.004 for VADER, -0.022 for baseline, and -0.023
+for FinBERT). The full-model F-test is non-significant for both sentiment
+variants. This is a sharper finding than "RMSE is similar": after
+accounting for model complexity, none of the specifications provides
+meaningful explanatory power.
 
 ### `model_metrics_vader.csv` and `model_metrics_finbert.csv`
 
@@ -154,14 +178,13 @@ variants per file.
 fold structure; cite the file as appendix. Optionally a single sentence
 in Section 5.5.
 
-**Why it matters / what to write.** Both VADER ridge_sentiment and ridge
-baseline pick alpha = 100,000 (the **top** of the grid) — the regularizer
-is shrinking sentiment to zero by choice. FinBERT ridge_sentiment picks
-alpha = 3,162. Worth one sentence in Section 5.5: "The Ridge cross-
-validation selected alpha at the top of the search grid for both
-baseline and sentiment-augmented variants, which is consistent with the
-OLS finding that the additional sentiment features carry no
-predictive load."
+**Why it matters / what to write.** Ridge baseline picks alpha = 100,000
+(the **top** of the grid). VADER ridge_sentiment picks alpha ≈ 56,234,
+also extremely high; FinBERT ridge_sentiment picks alpha ≈ 3,162. Worth
+one sentence in Section 5.5: "The Ridge cross-validation selected very
+large regularization values, especially for the baseline and VADER
+specifications, which is consistent with the OLS finding that the feature
+set carries little stable predictive load."
 
 ### `robustness_joint_ftest.csv` (item 8 from earlier discussion)
 
@@ -234,20 +257,20 @@ subset shows no significant sentiment effect.
 
 **What it contains.** 3x3 confusion matrix of post-level labels. Rows =
 adapted-VADER label (negative / neutral / positive). Columns = FinBERT
-label. Cells are post counts. Computed on all ~20,640 scored posts that
-appear in both files.
+label. Cells are post counts. Computed on 32,012 matched post-stock rows
+that appear in both scorer outputs.
 
 **Where it goes.** Section 7.1 (Limitations), supporting the "VADER and
 FinBERT have structural limits on WSB text" paragraph.
 
-**Why it matters / what to write.** The two scorers disagree
-catastrophically. Of the 21,282 posts adapted-VADER labels positive,
+**Why it matters / what to write.** The two scorers disagree sharply. Of
+the 21,282 matched post-stock rows adapted-VADER labels positive,
 **11,817 (55%) are labeled negative by FinBERT**, and only 5,066 (24%)
-agree. Of FinBERT-positive posts, ~76% (5,066 / 6,341) are also
-VADER-positive, but the asymmetry shows VADER is much more permissive
-on the positive side. Use this as the strongest empirical anchor for
-the scorer-limitations paragraph; pair it with item 11 (cross-scorer
-event-level r) for the same point at the aggregated level.
+agree. Of FinBERT-positive rows, ~80% (5,066 / 6,341) are also
+VADER-positive, but the asymmetry shows VADER is much more permissive on
+the positive side. Use this as the strongest empirical anchor for the
+scorer-limitations paragraph; pair it with `robustness_cross_scorer_event_corr.csv`
+for the same point at the aggregated event level.
 
 ---
 
