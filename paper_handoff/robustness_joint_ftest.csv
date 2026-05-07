@@ -1,0 +1,3 @@
+variant,n_train,df_num,df_denom,F,p_value,r2_full,r2_adj_full,constrained_features
+ols_vader_full,360,6,330,1.9787660988250793,0.06816434011237313,0.07665981371231179,-0.004482202658424361,post_count;mean_sentiment;median_sentiment;std_sentiment;frac_positive;frac_negative
+ols_finbert_full,360,6,330,0.9340045487107907,0.4705820246022637,0.059413232994697474,-0.023244391984556412,post_count;mean_sentiment;median_sentiment;std_sentiment;frac_positive;frac_negative

@@ -1,0 +1,7 @@
+feature,n_events,pearson_r
+post_count,425,1.0
+mean_sentiment,425,0.08259850869804164
+median_sentiment,425,-0.04395524676549947
+std_sentiment,425,0.3971547668340546
+frac_positive,425,0.21699130116890322
+frac_negative,425,0.23671204657169742
