@@ -1,12 +1,13 @@
 # Paper Handoff
 
-This folder contains the result tables needed to finish the current report
-draft, `NLP Research Report.docx` dated 2026-05-07.
+This folder is for finishing the current report draft,
+`NLP Research Report.docx` dated 2026-05-07.
 
-The report already has the broad story, data section, sentiment methodology,
-model design, basic figures, and a basic test-metric table. The remaining
-work is to add stronger evidence, correct a few overclaims, and make the
-main conclusion harder to misread.
+The CSVs are kept for audit/exact decimals, but teammates should be able to
+use the trimmed tables below directly in the paper. The report already has
+the broad narrative, data section, sentiment methodology, model design,
+basic figures, and a basic test-metric table. The remaining work is to add
+the stronger evidence below and fix a few overclaims.
 
 Main conclusion to preserve:
 
@@ -19,52 +20,26 @@ adding sentiment.
 
 ## Highest-Priority Edits
 
-1. In Section 2, fix the event window wording.
-   The report currently says posts were connected using "ten trading days
-   prior to earnings." The locked design is **10 calendar days before the
-   earnings date, excluding the earnings day itself**.
-
-2. In Section 5.1, add a per-ticker coverage table.
-   Use `event_sentiment_per_ticker_vader.csv`. This supports the report's
-   claim that coverage is uneven across tickers.
-
-3. In Section 5.4, add numeric correlation evidence.
-   Use `eda_feature_target_correlations.csv`. The current report says the
-   scatterplots look weak; this file gives the actual numbers.
-
-4. In Section 5.4 or 7.1, add scorer disagreement evidence.
-   Use `robustness_cross_scorer_event_corr.csv` and
-   `sentiment_label_confusion_finbert.csv`. VADER and FinBERT both fail to
-   produce useful predictive scatterplots, but they also measure very
-   different sentiment constructs.
-
-5. In Section 5.5, expand Table 2 or add supporting regression evidence.
-   Use `model_metrics_vader.csv`, `model_metrics_finbert.csv`,
-   `final_comparison_summary.csv`, `final_comparison_coefficients_wide.csv`,
-   `robustness_joint_ftest.csv`, and
-   `robustness_bootstrap_test_rmse.csv`.
-
-6. In Section 6 / 7.1, soften the thin-coverage explanation.
-   The report currently says thin coverage likely attenuates the sentiment
-   effect. The `post_count >= 10` robustness check does **not** support
-   that as the main explanation.
-
-7. Remove the duplicate Bollen et al. (2011) reference.
+1. Section 2: change "ten trading days prior to earnings" to **10 calendar
+   days before the earnings date, excluding the earnings day itself**.
+2. Section 5.1: add the per-ticker coverage table below.
+3. Section 5.4: add the feature/target correlation table below.
+4. Section 5.4 or 7.1: add the scorer-disagreement evidence below.
+5. Section 5.5: expand Table 2 or add supporting regression tables using
+   the model-performance, fit-stat, coefficient, F-test, and bootstrap
+   tables below.
+6. Section 6 / 7.1: soften the thin-coverage explanation. The well-covered
+   subset check does **not** show that thin coverage is the main reason the
+   sentiment effect fails.
+7. References: remove the duplicate Bollen et al. (2011) entry.
 
 ## Model Setup To Keep Consistent
 
 All OLS+sentiment models use `target_ret3` regressed on:
 
-- `ret5_pre`
-- `ret20_pre`
-- `vol20_pre`
-- `abvol_pre`
-- `post_count`
-- `mean_sentiment`
-- `median_sentiment`
-- `std_sentiment`
-- `frac_positive`
-- `frac_negative`
+- baseline features: `ret5_pre`, `ret20_pre`, `vol20_pre`, `abvol_pre`
+- sentiment features: `post_count`, `mean_sentiment`, `median_sentiment`,
+  `std_sentiment`, `frac_positive`, `frac_negative`
 - ticker fixed effects
 - calendar-year fixed effects
 
@@ -77,106 +52,107 @@ method remains adapted VADER.
 
 ## Section 5.1: Dataset Coverage
 
-### `event_sentiment_per_ticker_vader.csv`
-
 Use this as a new table immediately after Table 1.
 
 Suggested caption:
 
-> Per-ticker Reddit coverage and event-level adapted-VADER sentiment
-> statistics, 2016 to 2023-03-28.
+> Per-ticker Reddit coverage and event-level sentiment statistics,
+> 2016 to 2023-03-28.
 
-What it contains:
+Source files:
 
-One row per ticker with:
+- `event_sentiment_per_ticker_vader.csv`
+- `event_sentiment_per_ticker_finbert.csv`
 
-- `events`
-- `zero_events`
-- `thin_events` where `post_count < 10`
-- `mean_posts`
-- `mean_sent`
-- `mean_fracpos`
-- `mean_fracneg`
+| Ticker | Events | Zero Events | Thin Events | Mean Posts | Mean Sent VADER | Mean Sent FinBERT |
+|---|---:|---:|---:|---:|---:|---:|
+| TSLA | 29 | 0 | 0 | 206.8 | 0.200 | -0.108 |
+| GOOGL | 29 | 0 | 0 | 110.9 | 0.279 | -0.107 |
+| AMZN | 29 | 0 | 3 | 73.7 | 0.337 | -0.109 |
+| AAPL | 29 | 0 | 0 | 61.2 | 0.259 | -0.122 |
+| MSFT | 29 | 0 | 7 | 35.4 | 0.324 | -0.154 |
+| NVDA | 29 | 0 | 3 | 35.2 | 0.267 | -0.069 |
+| MU | 29 | 2 | 13 | 29.8 | 0.263 | -0.111 |
+| AMD | 29 | 0 | 4 | 27.4 | 0.300 | -0.108 |
+| NFLX | 29 | 0 | 6 | 27.3 | 0.253 | -0.126 |
+| DIS | 29 | 1 | 11 | 24.9 | 0.319 | -0.129 |
+| BA | 29 | 3 | 18 | 19.5 | 0.304 | -0.166 |
+| WMT | 29 | 1 | 13 | 18.2 | 0.281 | -0.072 |
+| INTC | 29 | 2 | 13 | 16.6 | 0.302 | -0.076 |
+| JPM | 29 | 0 | 9 | 15.2 | 0.421 | -0.183 |
+| GS | 29 | 1 | 13 | 11.7 | 0.383 | -0.046 |
 
-What to say:
+What to write:
 
-Coverage is highly uneven. TSLA averages about 207 matched posts per event.
-GOOGL averages about 111. By contrast, GS, JPM, INTC, WMT, and BA have much
-lower average coverage, and BA has the most thin events. This table supports
-the report's discussion of uneven Reddit coverage across the 15-stock
-universe.
+Coverage is highly uneven. TSLA averages about 207 matched posts per event,
+while GOOGL averages about 111. Several tickers have much thinner coverage:
+GS, JPM, INTC, WMT, and BA all average far fewer posts per event, and BA
+has the most thin events. This supports the report's claim that Reddit
+coverage is concentrated in a subset of retail-favorite tickers.
 
-Also note that adapted-VADER mean sentiment is positive for every ticker
-(roughly +0.20 to +0.41). This is worth mentioning as a calibration issue:
-WSB text scores positive under adapted VADER across the full universe.
-
-### `event_sentiment_per_ticker_finbert.csv`
-
-Optional appendix table or side-by-side companion to the VADER table.
-
-What to say:
-
-FinBERT mean sentiment is negative for every ticker, roughly -0.05 to -0.21.
-This is useful because it shows that "WSB sentiment" depends heavily on the
-scoring method. Adapted VADER and FinBERT do not produce the same
-per-ticker sentiment picture.
+Also note the scorer contrast. Adapted-VADER mean sentiment is positive for
+every ticker, while FinBERT mean sentiment is negative for every ticker.
+This is useful evidence that "WSB sentiment" depends heavily on the scoring
+method.
 
 ## Section 5.4: Sentiment and Returns
 
-### `eda_feature_target_correlations.csv`
+### Feature/Target Correlations
 
-Use this to add a small inline table of the top correlations, or cite it in
-the paragraph around Figure 5.
+Use this around Figure 5 to put numbers behind the "weak relationship"
+claim.
 
-What it contains:
+Source file: `eda_feature_target_correlations.csv`
 
-Pearson correlations between numeric features and `target_ret3`, computed
-on the well-covered subset where `post_count >= 10` (n = 322).
+Computed on the well-covered subset where `post_count >= 10` (n = 322).
 
-Important numbers:
+| Feature | Pearson r with `target_ret3` |
+|---|---:|
+| `frac_negative` | 0.103 |
+| `frac_positive` | -0.063 |
+| `std_sentiment` | 0.063 |
+| `ret5_pre` | 0.060 |
+| `ret20_pre` | 0.048 |
+| `vol20_pre` | 0.048 |
+| `mean_sentiment` | -0.036 |
+| `abvol_pre` | 0.034 |
+| `median_sentiment` | -0.020 |
+| `post_count` | 0.000 |
 
-- `frac_negative`: r = 0.103
-- `frac_positive`: r = -0.063
-- `std_sentiment`: r = 0.063
-- `ret5_pre`: r = 0.060
-- `ret20_pre`: r = 0.048
-
-What to say:
+What to write:
 
 The largest absolute correlation is only about 0.103, meaning the strongest
 single feature explains only about 1.1% of target variance. The next-largest
-correlations are around 0.06. This gives numeric support for the current
-Figure 5 interpretation: the fitted relationship between sentiment and
-post-earnings returns is almost flat.
+correlations are around 0.06. This numerically supports the visual result in
+Figure 5: sentiment and post-earnings returns have a very weak relationship.
 
 Avoid saying the largest correlation is only 0.05; it is closer to 0.10.
 The correct interpretation is still "weak."
 
-### `robustness_cross_scorer_event_corr.csv`
+### Cross-Scorer Agreement
 
 Use this near the end of Section 5.4 or in Section 7.1.
 
-What it contains:
+Source file: `robustness_cross_scorer_event_corr.csv`
 
-Event-level Pearson correlations between adapted-VADER and FinBERT for the
-six sentiment features, computed on 425 events with at least one matched
-post.
+Computed on 425 events with at least one matched post.
 
-Important numbers:
+| Sentiment Feature | VADER-FinBERT Event-Level r |
+|---|---:|
+| `post_count` | 1.000 |
+| `mean_sentiment` | 0.083 |
+| `median_sentiment` | -0.044 |
+| `std_sentiment` | 0.397 |
+| `frac_positive` | 0.217 |
+| `frac_negative` | 0.237 |
 
-- `mean_sentiment`: r = 0.083
-- `median_sentiment`: r = -0.044
-- `std_sentiment`: r = 0.397
-- `frac_positive`: r = 0.217
-- `frac_negative`: r = 0.237
-
-What to say:
+What to write:
 
 Both VADER and FinBERT fail to produce useful predictive scatterplots, but
-they also disagree strongly with each other. The mean and median sentiment
-features are essentially uncorrelated across scorers. This means "Reddit
-sentiment" is operationally fragile: the conclusion does not depend only on
-the regression model, but also on how sentiment is defined.
+they also disagree strongly with each other. Mean and median sentiment are
+essentially uncorrelated across scorers. This means "Reddit sentiment" is
+operationally fragile: the conclusion depends not only on the regression
+model, but also on how sentiment is defined.
 
 Suggested sentence:
 
@@ -191,30 +167,25 @@ but the paper will be stronger if Section 5.5 also includes train metrics,
 OLS fit statistics, coefficient evidence, joint F-tests, and bootstrap
 uncertainty.
 
-### `model_metrics_vader.csv` and `model_metrics_finbert.csv`
+### Expanded Model Metrics
 
-Use these to expand Table 2.
+Use this to replace or expand Table 2.
 
-What they contain:
+Source files:
 
-Train and test RMSE, MAE, directional accuracy, selected Ridge alpha, and
-sample sizes for:
+- `model_metrics_vader.csv`
+- `model_metrics_finbert.csv`
 
-- OLS baseline
-- OLS + sentiment
-- Ridge baseline
-- Ridge + sentiment
+| Model | Sentiment Source | Alpha | Train RMSE | Test RMSE | Test MAE | Test Directional Accuracy |
+|---|---|---:|---:|---:|---:|---:|
+| OLS baseline | None |  | 0.0715 | 0.0949 | 0.0687 | 0.5733 |
+| OLS + VADER | Adapted VADER |  | 0.0702 | 0.0936 | 0.0677 | 0.5467 |
+| OLS + FinBERT | FinBERT |  | 0.0709 | 0.0952 | 0.0689 | 0.5733 |
+| Ridge baseline | None | 100000 | 0.0731 | 0.0948 | 0.0701 | 0.5333 |
+| Ridge + VADER | Adapted VADER | 56234 | 0.0731 | 0.0948 | 0.0701 | 0.5333 |
+| Ridge + FinBERT | FinBERT | 3162 | 0.0729 | 0.0946 | 0.0698 | 0.5333 |
 
-Important numbers:
-
-- OLS baseline test RMSE: 0.0949
-- OLS + VADER test RMSE: 0.0936
-- OLS + FinBERT test RMSE: 0.0952
-- Ridge baseline test RMSE: 0.0948
-- Ridge + VADER test RMSE: 0.0948
-- Ridge + FinBERT test RMSE: 0.0946
-
-What to say:
+What to write:
 
 The VADER OLS model has a tiny RMSE improvement, but directional accuracy
 falls from 0.5733 to 0.5467. FinBERT does not improve OLS. Ridge is
@@ -224,80 +195,65 @@ Also mention the train/test gap: train RMSE is about 0.071, while test RMSE
 is about 0.094-0.095. This supports the discussion that the prediction
 target is noisy and hard to forecast.
 
-### `final_comparison_summary.csv`
+### OLS Fit Statistics
 
-Use this as a fit-stat block below the main OLS table.
+Use this as a fit-stat block below the OLS regression table.
 
-What it contains:
+Source file: `final_comparison_summary.csv`
 
-OLS R-squared, adjusted R-squared, F-statistics, F-test p-values, and
-train/test metrics for baseline, VADER, and FinBERT.
+| OLS Variant | R-squared | Adjusted R-squared | Full-Model F p-value | Train RMSE | Test RMSE | Test Directional Accuracy |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline | 0.043 | -0.022 | 0.880 | 0.0715 | 0.0949 | 0.5733 |
+| + VADER | 0.077 | -0.004 | 0.551 | 0.0702 | 0.0936 | 0.5467 |
+| + FinBERT | 0.059 | -0.023 | 0.858 | 0.0709 | 0.0952 | 0.5733 |
 
-Important numbers:
+What to write:
 
-- OLS baseline adjusted R-squared: -0.022
-- OLS + VADER adjusted R-squared: -0.004
-- OLS + FinBERT adjusted R-squared: -0.023
+All adjusted R-squared values are negative. This means the OLS models do
+not provide meaningful explanatory power after accounting for model
+complexity. This is stronger evidence than simply saying RMSE is similar.
 
-What to say:
+### Sentiment Coefficients
 
-All adjusted R-squared values are negative. This means the models do not
-provide meaningful explanatory power after accounting for model complexity.
-This is stronger evidence than simply saying RMSE is similar.
+Use this as the core coefficient evidence. It is better to show only the
+six sentiment rows in the main text and state that market controls, ticker
+fixed effects, and year fixed effects are included.
 
-### `final_comparison_coefficients_wide.csv`
+Source files:
 
-Use this for a coefficient table in Section 5.5.
+- `final_comparison_coefficients_wide.csv`
+- `final_comparison_coefficients_long.csv`
 
-The main paper should show only:
-
-- constant
-- four baseline market features
-- six sentiment features
-
-Ticker and year fixed effects can go to the appendix or be summarized with
-a note saying they were included.
-
-Important coefficient results:
-
-- VADER `frac_negative`: coefficient about +0.110, p about 0.009
-- VADER `frac_positive`: coefficient about -0.072, p about 0.067
-- No other VADER sentiment feature is individually significant at 5%.
-- No FinBERT sentiment feature is individually significant at 5%.
+| Feature | VADER Coef. | VADER p-value | FinBERT Coef. | FinBERT p-value |
+|---|---:|---:|---:|---:|
+| `post_count` | -0.0000 | 0.985 | -0.0000 | 0.866 |
+| `mean_sentiment` | 0.068 | 0.207 | 0.067 | 0.186 |
+| `median_sentiment` | 0.020 | 0.487 | -0.072 | 0.062 |
+| `std_sentiment` | -0.0000 | 1.000 | 0.009 | 0.770 |
+| `frac_positive` | -0.072 | 0.067 | 0.013 | 0.663 |
+| `frac_negative` | 0.110 | 0.009 | 0.021 | 0.449 |
 
 Interpret carefully:
 
-The significant VADER coefficient is `frac_negative`, and its sign is
-positive. That is the opposite of a simple "bullish sentiment predicts
-positive returns" story. Do **not** describe this as evidence that Reddit
-bullishness predicts post-earnings returns.
+The only VADER sentiment feature significant at 5% is `frac_negative`, and
+its coefficient is positive. That is the opposite of a simple "bullish
+sentiment predicts positive returns" story. Do **not** describe this as
+evidence that Reddit bullishness predicts post-earnings returns.
 
-### `final_comparison_coefficients_long.csv`
+For FinBERT, none of the six sentiment features are significant at 5%.
 
-Same coefficient information as the wide file, but in long format with a
-`sig` column:
-
-- `***` for p < 0.01
-- `**` for p < 0.05
-- `*` for p < 0.10
-
-Use whichever format is easier for building the final regression table.
-
-### `robustness_joint_ftest.csv`
+### Joint F-Test For Sentiment Features
 
 Use this immediately after the coefficient table.
 
-What it contains:
+Source file: `robustness_joint_ftest.csv`
 
-Joint F-tests of whether all six sentiment coefficients are zero in the
-OLS+sentiment models.
+| Model | F-test | p-value | Interpretation |
+|---|---:|---:|---|
+| OLS + VADER | 1.979 | 0.068 | Borderline at 10%, not significant at 5% |
+| OLS + FinBERT | 0.934 | 0.471 | Not significant |
 
-Important numbers:
-
-- VADER: F(6, 330) = 1.98, p = 0.068
-- FinBERT: F(6, 330) = 0.93, p = 0.471
-
-What to say:
+What to write:
 
 At the 5% level, we cannot reject that the six sentiment coefficients are
 jointly zero. VADER is borderline at the 10% level, but not conventionally
@@ -309,26 +265,22 @@ Suggested sentence:
 > sentiment coefficients are jointly zero (VADER p = 0.068; FinBERT
 > p = 0.471).
 
-### `robustness_bootstrap_test_rmse.csv`
+### Bootstrap Test-Set RMSE Uncertainty
 
 Use this to qualify the small OLS+VADER RMSE improvement.
 
-What it contains:
+Source file: `robustness_bootstrap_test_rmse.csv`
 
-Bootstrap results on the 75-event test set using B = 2000 and seed =
-20240507. The reported difference is:
+Reported difference is:
 
 `RMSE(sentiment model) - RMSE(baseline model)`
 
-Important numbers:
+| Comparison | Baseline RMSE | Sentiment RMSE | RMSE Difference | 95% CI | Share Sentiment Beats Baseline |
+|---|---:|---:|---:|---|---:|
+| OLS + VADER vs baseline | 0.0949 | 0.0936 | -0.0014 | [-0.0035, +0.0011] | 0.861 |
+| OLS + FinBERT vs baseline | 0.0949 | 0.0952 | +0.0003 | [-0.0013, +0.0020] | 0.372 |
 
-- VADER Delta RMSE: -0.00137
-- VADER 95% CI: [-0.0035, +0.0011]
-- VADER beats baseline in 86% of bootstrap iterations
-- FinBERT Delta RMSE: +0.00028
-- FinBERT 95% CI: [-0.0013, +0.0020]
-
-What to say:
+What to write:
 
 The point estimate slightly favors VADER, but the confidence interval
 crosses zero. The improvement is too small to treat as reliable evidence
@@ -336,30 +288,26 @@ that sentiment improves prediction.
 
 Suggested sentence:
 
-> The point estimate favors VADER (Delta RMSE = -0.0014), but the 95%
+> The point estimate favors VADER (RMSE difference = -0.0014), but the 95%
 > bootstrap interval ranges from -0.0035 to +0.0011, so the improvement is
 > within test-sample uncertainty.
 
-### `ridge_cv_detail_vader.csv` and `ridge_cv_detail_finbert.csv`
+### Ridge Cross-Validation Detail
 
-Use these only if adding detail on Ridge validation.
+Use this only if adding detail on Ridge validation.
 
-What they contain:
+Source files:
 
-Walk-forward Ridge cross-validation details for 33 alphas from 0.001 to
-100,000:
+- `ridge_cv_detail_vader.csv`
+- `ridge_cv_detail_finbert.csv`
 
-- train 2016-2018, validate 2019
-- train 2016-2019, validate 2020
-- train 2016-2020, validate 2021
+| Ridge Variant | Selected Alpha |
+|---|---:|
+| Ridge baseline | 100000 |
+| Ridge + VADER | 56234 |
+| Ridge + FinBERT | 3162 |
 
-Important numbers:
-
-- Ridge baseline selected alpha = 100,000
-- Ridge + VADER selected alpha about 56,234
-- Ridge + FinBERT selected alpha about 3,162
-
-What to say:
+What to write:
 
 The selected regularization values are large, especially for baseline and
 VADER. This is consistent with weak stable predictive signal in the feature
@@ -367,43 +315,49 @@ set.
 
 ## Section 6 / 7.1: Discussion and Limitations
 
-### `robustness_geq10_posts.csv`
+### Well-Covered Subset Check
 
 Use this to revise the thin-coverage limitation.
 
-What it contains:
+Source file: `robustness_geq10_posts.csv`
 
-OLS models rerun on the well-covered subset where `post_count >= 10`
-(n = 322). It reports train/test metrics, R-squared, adjusted R-squared,
-and the joint F-test for the six sentiment coefficients.
+Subset: events where `post_count >= 10`, n = 322.
 
-Important numbers:
+| Variant | Train n | Test n | Test RMSE | Test Directional Accuracy | Adjusted R-squared | Sentiment F p-value |
+|---|---:|---:|---:|---:|---:|---:|
+| VADER baseline | 263 | 59 | 0.0994 | 0.593 | -0.041 |  |
+| VADER + sentiment | 263 | 59 | 0.0997 | 0.542 | -0.025 | 0.144 |
+| FinBERT baseline | 263 | 59 | 0.0994 | 0.593 | -0.041 |  |
+| FinBERT + sentiment | 263 | 59 | 0.1029 | 0.492 | -0.025 | 0.144 |
 
-- VADER sentiment F-test p-value: 0.144
-- FinBERT sentiment F-test p-value: 0.144
-- All subset model variants still have negative adjusted R-squared.
-
-What to say:
+What to write:
 
 Thin coverage is still a limitation because low-post events produce noisy
 sentiment aggregates. However, dropping thin-coverage events does **not**
 make the sentiment effect significant. Therefore, do not say thin coverage
-is the main reason sentiment fails. A more accurate interpretation is:
+is the main reason sentiment fails.
+
+Suggested sentence:
 
 > Thin coverage adds measurement noise, but it does not appear to be the
 > binding constraint; even among events with at least 10 matched posts,
 > sentiment features are not jointly significant.
 
-### `sentiment_label_confusion_finbert.csv`
+### VADER vs FinBERT Label Confusion
 
 Use this in Section 7.1 when discussing limits of VADER and FinBERT on WSB
 text.
 
-What it contains:
+Source file: `sentiment_label_confusion_finbert.csv`
 
-A 3-by-3 post-level label confusion matrix. Rows are adapted-VADER labels
-and columns are FinBERT labels. Counts are matched post-stock rows, not
-unique Reddit posts.
+Rows are adapted-VADER labels. Columns are FinBERT labels. Counts are
+matched post-stock rows, not unique Reddit posts.
+
+| Adapted-VADER Label | FinBERT Negative | FinBERT Neutral | FinBERT Positive |
+|---|---:|---:|---:|
+| Negative | 3,205 | 879 | 360 |
+| Neutral | 2,547 | 2,824 | 915 |
+| Positive | 11,817 | 4,399 | 5,066 |
 
 Important numbers:
 
@@ -413,7 +367,7 @@ Important numbers:
 - Only 5,066 VADER-positive rows are also FinBERT-positive
 - Of FinBERT-positive rows, about 80% are also VADER-positive
 
-What to say:
+What to write:
 
 The disagreement is asymmetric. VADER is much more permissive on the
 positive side, while FinBERT labels many VADER-positive WSB posts as
@@ -437,15 +391,6 @@ Sentiment:
 - FinBERT score is `p_positive - p_negative`.
 - The same six event-level features are used for VADER and FinBERT.
 
-Event-level sentiment features:
-
-- `post_count`
-- `mean_sentiment`
-- `median_sentiment`
-- `std_sentiment`
-- `frac_positive`
-- `frac_negative`
-
 Target and features:
 
 - Unit of observation: one ticker-earnings event.
@@ -459,8 +404,6 @@ Target and features:
   dummies pass through unscaled.
 
 ## Small Copyediting Fixes In The Current Report
-
-These are not result changes, but they are easy cleanup items:
 
 - Section 2: add a space in "2016-2023.These".
 - Section 2: add a space in "very small.Sampling".
